@@ -4,5 +4,6 @@ from chatbot import views
 
 urlpatterns = [
     path('', TemplateView.as_view(template_name='home.html')),
-    path('chat', views.ChatAPI.as_view())
+    path('chat', views.ChatAPI.as_view()),
+    path('clear_session', views.ClearSessionAPI.as_view()),
 ]

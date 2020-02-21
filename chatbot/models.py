@@ -29,7 +29,7 @@ class Size(models.Model):
 
 class Order(models.Model):
     STATUS = (
-        ('Order Placed', 'Order Placed'),
+        ('Placed', 'Placed'),
         ('Preparing', 'Preparing'),
         ('Out for Delivery', 'Out for Delivery'),
         ('Delivered', 'Delivered'),
@@ -38,8 +38,10 @@ class Order(models.Model):
     name = models.CharField(max_length=30)
     address = models.CharField(max_length=100)
     quantity = models.PositiveSmallIntegerField()
-    toppings = models.ManyToManyField(Toppings, related_name='toppings')
+    toppings = models.ManyToManyField(Toppings, related_name='toppings', null=True)
     size = models.ForeignKey(Size, related_name='pizza_size', on_delete=models.DO_NOTHING)
+    status = models.CharField(max_length=20, choices=STATUS, default='Placed')
+    date_time = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
         seed(int(time.time()))
