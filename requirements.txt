@@ -1,3 +1,5 @@
 nltk
 djangorestframework
 django
+gunicorn
+django-heroku
