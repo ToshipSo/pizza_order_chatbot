@@ -10,35 +10,28 @@ import random
 # Create your views here.
 class ChatAPI(APIView):
 
-    def create_regex(self, model, field_name):
-        values = model.objects.values_list(field_name, flat=True)
-        regex = ''
-        for value in values:
-            regex += str(value) + '|'
-        return regex[:-1]
-
     def post(self, request):
         session = request.session
         context = int(session.get('context', 0))
         text = str(request.data['text'])
         context_change = True
         response = ''
-        payload = '\n'
+        payload = ' '
         if context == Response.WELCOME:
             context = get_response(text)
             if context == Response.FALLBACK:
                 response = select_random_response(Response.FALLBACK)
                 context = Response.WELCOME
             context_change = False
-        elif context == Response.TAKE_SIZE and re.findall('(small|regular|medium|large)', text):
-            request.session['size'] = re.findall('(small|regular|medium|large)', text)[0]
+        elif context == Response.TAKE_SIZE and re.findall(create_regex(Size, 'size'), text):
+            request.session['size'] = re.findall(create_regex(Size, 'size'), text)[0]
             toppings = Toppings.objects.values_list('topping', flat=True)
             payload = 'We have '
             for topping in toppings:
                 payload += str(topping) + ', '
             payload = payload[:-2] + '.'
-        elif context == Response.TAKE_TOPPINGS and re.findall(self.create_regex(Toppings, 'topping'), text):
-            request.session['toppings'] = re.findall(self.create_regex(Toppings, 'topping'), text)
+        elif context == Response.TAKE_TOPPINGS and re.findall(create_regex(Toppings, 'topping'), text):
+            request.session['toppings'] = re.findall(create_regex(Toppings, 'topping'), text)
             payload = '(Enter quantity in integer value.)'
         elif context == Response.TAKE_QUANTITY and re.findall('\d+', text):
             request.session['quantity'] = re.findall('\d+', text)[0]
@@ -116,3 +109,11 @@ def select_random_response(context):
     response = Response.objects.filter(context=context).all()
     random_response = random.choices(response)[0]
     return random_response.response
+
+
+def create_regex(model, field_name):
+    values = model.objects.values_list(field_name, flat=True)
+    regex = ''
+    for value in values:
+        regex += str(value) + '|'
+    return regex[:-1]
