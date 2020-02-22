@@ -68,7 +68,6 @@ class Order(models.Model):
     toppings = models.ManyToManyField(Toppings, related_name='toppings', null=True)
     size = models.ForeignKey(Size, related_name='pizza_size', on_delete=models.DO_NOTHING)
     status = models.CharField(max_length=20, choices=STATUS, default='Placed')
-    date_time = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
         seed(int(time.time()))
