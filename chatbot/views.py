@@ -23,23 +23,27 @@ class ChatAPI(APIView):
         response = ''
         if context == 0:
             context = get_response(text)
-            response = Response.objects.filter(context=context).first().response
+            if context == 10:
+                response = Response.objects.filter(context=context).first().response
+                context = 0
+            # else:
+            #     response = Response.objects.filter(context=context).first().response
         elif context == 1 and re.findall('(small|regular|medium|large)', text):
             request.session['size'] = re.findall('(small|regular|medium|large)', text)[0]
             context += 1
-            response = Response.objects.filter(context=context).first().response
+            # response = Response.objects.filter(context=context).first().response
         elif context == 2 and re.findall(self.create_regex(Toppings, 'topping'), text):
             request.session['toppings'] = re.findall(self.create_regex(Toppings, 'topping'), text)
             context += 1
-            response = Response.objects.filter(context=context).first().response
+            # response = Response.objects.filter(context=context).first().response
         elif context == 3 and re.findall('\d+', text):
             request.session['quantity'] = re.findall('\d+', text)[0]
             context += 1
-            response = Response.objects.filter(context=context).first().response
+            # response = Response.objects.filter(context=context).first().response
         elif context == 4:
             request.session['name'] = text
             context = context + 1
-            response = Response.objects.filter(context=context).first().response
+            # response = Response.objects.filter(context=context).first().response
         elif context == 5:
             request.session['address'] = text
             context += 1
@@ -61,12 +65,22 @@ class ChatAPI(APIView):
                 context = 1
                 response = "Okay, Let's rebuild your order again. Tell me the pizza size again."
                 clear_session(request)
-        elif context == 7 and re.match('\d{7}', text):
-            order_no = int(re.findall('\d{7}', text)[0])
+            else:
+                response = Response.objects.filter(context=10).first().response
+        elif context == 7 and re.findall('\d{2,7}', text):
+            order_no = int(re.findall('\d{2,7}', text)[0])
             order = Order.objects.filter(order_id=order_no).first()
             if order:
                 response = 'Your Order is ' + order.status
-            context = 0
+                context = 0
+            else:
+                response = 'Please enter correct Order number.'
+        else:
+            response = Response.objects.filter(context=10).first().response
+
+        if response == '':
+            response = Response.objects.filter(context=context).first().response
+
         session['context'] = context
         return JsonResponse({
             'text': response

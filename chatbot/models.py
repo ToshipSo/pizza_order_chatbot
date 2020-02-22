@@ -5,13 +5,25 @@ import time
 
 # Create your models here.
 class Response(models.Model):
+    WELCOME = 0
+    TAKE_ORDER = 1
+    TAKE_SIZE
+    TAKE_TOPPINGS = 2
+
+    CHOICES = (
+        (0, 'Welcome'),
+        (1, 'Take Order'),
+    )
     response = models.CharField(max_length=200)
-    context = models.PositiveSmallIntegerField()
+    context = models.PositiveSmallIntegerField(choices=CHOICES)
 
 
 class Toppings(models.Model):
     topping = models.CharField(max_length=15)
     price = models.IntegerField()
+
+    def __str__(self):
+        return self.topping
 
     def save(self, *args, **kwargs):
         self.topping = self.topping.lower()
@@ -21,6 +33,9 @@ class Toppings(models.Model):
 class Size(models.Model):
     size = models.CharField(max_length=10)
     price = models.IntegerField()
+
+    def __str__(self):
+        return self.size
 
     def save(self, *args, **kwargs):
         self.size = self.size.lower()

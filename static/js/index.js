@@ -30,6 +30,7 @@ function submit() {
 }
 
 function getChatResponse(text) {
+    showTyping();
     var div = $('div.d-flex.justify-content-start.mb-4').clone();
     $.ajax({
         headers: {"X-CSRFToken": getCookie('csrftoken')},
@@ -39,15 +40,29 @@ function getChatResponse(text) {
         contentType: 'application/json',
         data: JSON.stringify({'text': text}),
         success: function (data) {
-            div.find('.msg_cotainer').text(data.text);
-            div.show();
-            $('div.card-body.msg_card_body').append(div.get(0));
-            // $('div.card-body.msg_card_body').scrollTop($('div.card-body.msg_card_body').height());
-            $('div.card-body.msg_card_body').animate({
-        scrollTop: $('div.card-body.msg_card_body').height()
-      }, 800);
+            setTimeout(function(){
+                hideTyping();
+                div.find('.msg_cotainer').text(data.text);
+                div.show();
+                $('div.card-body.msg_card_body').append(div.get(0));
+                $('div.card-body.msg_card_body').animate({
+                    scrollTop: $('div.card-body.msg_card_body').height()
+                }, 800);
+
+            }, 1000);
+
         },
     });
+}
+
+function showTyping(){
+    var typing = $('div.typing-indicator').clone();
+    typing.show();
+    $('div.card-body.msg_card_body').append(typing.get(0));
+}
+
+function hideTyping(){
+    $('div.typing-indicator').last().remove();
 }
 
 $('div.card-body.msg_card_body').animate({
