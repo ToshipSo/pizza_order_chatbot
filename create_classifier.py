@@ -2,6 +2,7 @@ import nltk
 
 nltk.download('punkt')
 from nltk.tokenize import word_tokenize
+from string import punctuation
 import csv
 import pickle
 
@@ -17,7 +18,7 @@ class PreProcessText:
     def _processText(self, text):
         text = text.lower()
         text = word_tokenize(text)
-        return text
+        return [word for word in text if word not in punctuation]
 
 
 def buildVocabulary(preprocessedTrainingSet):

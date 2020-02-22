@@ -1,6 +1,6 @@
 import pickle
-
 import nltk
+from string import punctuation
 
 nltk.download('punkt')
 from nltk.tokenize import word_tokenize
@@ -16,7 +16,7 @@ classifier_file.close()
 def process_text(text):
     text = text.lower()
     text = word_tokenize(text)
-    return text
+    return [word for word in text if word not in punctuation]
 
 
 def extract_features(text):
@@ -32,7 +32,7 @@ def get_response(text):
     features = extract_features(processed_text)
     label = classifier.classify(features)
     x = classifier.prob_classify(features).prob(label)
-    if x < 0.80:
+    if x < 0.80 or (x < 0.95 and label == '0'):
         return 10
     return int(label)
     # return x
