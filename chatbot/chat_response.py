@@ -34,7 +34,7 @@ def get_response(text):
     features = extract_features(processed_text)
     label = classifier.classify(features)
     x = classifier.prob_classify(features).prob(label)
-    if x < 0.60:
+    if x < 0.51:
         return 10
     return int(label)
 

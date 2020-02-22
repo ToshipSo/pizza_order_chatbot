@@ -45,23 +45,14 @@ class ChatAPI(APIView):
             price *= int(session['quantity'])
             response = "That will be: " + str(price) + "Rs. \n Shall I confirm it."
         elif context == Response.TAKE_CONFIRMATION:
-            print(1)
             if re.findall('yes|yep|sure|great|yeah|ok|okay|cool', text.lower()):
-                print(2)
                 size = Size.objects.filter(size=session['size']).first()
-                print(3)
                 toppings = Toppings.objects.filter(topping__in=list(session['toppings']))
-                print(3)
                 order = Order(name=session['name'], address=session['address'], quantity=session['quantity'], size=size)
-                print(4)
                 order.save()
-                print(5)
                 order.toppings.add(*list(toppings))
-                print(6)
                 response = 'Thanks for ordering with us. Your Order No is: ' + str(order.order_id)
-                print(7)
                 context = Response.WELCOME
-                print(8)
                 context_change = False
             elif re.findall('no|nah|never', text.lower()):
                 context = Response.TAKE_SIZE

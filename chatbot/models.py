@@ -71,10 +71,7 @@ class Order(models.Model):
 
     def save(self, *args, **kwargs):
         seed(int(time.time()))
-        self.order_id = int(random() * 10000000)
+        if not self.order_id:
+            self.order_id = int(random() * 10000000)
         return super(Order, self).save(*args, **kwargs)
 
-# @receiver(post_save, sender=Order)
-# def save_profile(sender, instance, **kwargs):
-#     time.sleep(10)
-#     instance.
