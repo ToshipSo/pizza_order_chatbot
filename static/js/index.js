@@ -18,20 +18,22 @@ function submit() {
     var text = $('#inp_text').val();
     if (text !== '') {
         $('#inp_text').val('');
-        var div = $('div.d-flex.justify-content-end.mb-4').clone();
+        var div = $('div.d-flex.justify-content-end.mb-4').last().clone();
         div.find('.msg_cotainer_send').text(text);
         div.show();
         $('div.card-body.msg_card_body').append(div.get(0));
         $('div.card-body.msg_card_body').animate({
-        scrollTop: $('div.card-body.msg_card_body').height()
+        scrollTop: document.querySelector('.card-body.msg_card_body').scrollHeight,
+                    behavior: "smooth"
       }, 800);
+        console.log($('div.d-flex.justify-content-end.mb-4').last().position().top);
         getChatResponse(text);
     }
 }
 
 function getChatResponse(text) {
     showTyping();
-    var div = $('div.d-flex.justify-content-start.mb-4').clone();
+    var div = $('div.d-flex.justify-content-start.mb-4').last().clone();
     $.ajax({
         headers: {"X-CSRFToken": getCookie('csrftoken')},
         url: '/chat',
@@ -46,9 +48,10 @@ function getChatResponse(text) {
                 div.show();
                 $('div.card-body.msg_card_body').append(div.get(0));
                 $('div.card-body.msg_card_body').animate({
-                    scrollTop: $('div.card-body.msg_card_body').height()
+                    scrollTop: document.querySelector('.card-body.msg_card_body').scrollHeight,
+                    behavior: "smooth"
                 }, 800);
-
+                console.log($('div.d-flex.justify-content-start.mb-4').last().position().top);
             }, 1000);
 
         },

@@ -33,7 +33,7 @@ def get_response(text):
     processed_text = process_text(text)
     features = extract_features(processed_text)
     label = classifier.classify(features)
-    if classifier.prob_classify(features).prob(label) < 0.65:
+    if classifier.prob_classify(features).prob(label) < 0.60:
         return 10
-    return label
+    return int(label)
 

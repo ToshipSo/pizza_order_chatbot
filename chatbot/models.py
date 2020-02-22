@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from random import random, seed
 import time
 
@@ -6,13 +8,25 @@ import time
 # Create your models here.
 class Response(models.Model):
     WELCOME = 0
-    TAKE_ORDER = 1
-    TAKE_SIZE
+    TAKE_SIZE = 1
     TAKE_TOPPINGS = 2
+    TAKE_QUANTITY = 3
+    TAKE_NAME = 4
+    TAKE_ADDRESS = 5
+    TAKE_CONFIRMATION = 6
+    GET_STATUS = 7
+    FALLBACK = 10
 
     CHOICES = (
-        (0, 'Welcome'),
-        (1, 'Take Order'),
+        (WELCOME, 'Welcome'),
+        (TAKE_SIZE, 'Take Size'),
+        (TAKE_TOPPINGS, 'Take Toppings'),
+        (TAKE_QUANTITY, 'Take Quantity'),
+        (TAKE_NAME, 'Take Name'),
+        (TAKE_ADDRESS, 'Take Address'),
+        (TAKE_CONFIRMATION, 'Take Confirmation'),
+        (GET_STATUS, 'Get Pizza Status'),
+        (FALLBACK, 'Fallback')
     )
     response = models.CharField(max_length=200)
     context = models.PositiveSmallIntegerField(choices=CHOICES)
@@ -62,3 +76,8 @@ class Order(models.Model):
         seed(int(time.time()))
         self.order_id = int(random() * 10000000)
         return super(Order, self).save(*args, **kwargs)
+
+# @receiver(post_save, sender=Order)
+# def save_profile(sender, instance, **kwargs):
+#     time.sleep(10)
+#     instance.

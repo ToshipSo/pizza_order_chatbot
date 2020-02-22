@@ -12,7 +12,8 @@ class SizeAdmin(admin.ModelAdmin):
 
 
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ['order_id', 'name', 'address']
+    list_display = ['order_id', 'status', 'name', 'address']
+    list_editable = ['status']
 
 
 class ResponseAdmin(admin.ModelAdmin):

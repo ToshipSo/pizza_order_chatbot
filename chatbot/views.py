@@ -4,6 +4,7 @@ from .chat_response import get_response
 from .models import Response, Toppings, Order, Size
 from django.db.models import Sum
 import re
+import random
 
 
 # Create your views here.
@@ -20,68 +21,75 @@ class ChatAPI(APIView):
         session = request.session
         context = int(session.get('context', 0))
         text = str(request.data['text'])
+        context_change = True
         response = ''
-        if context == 0:
+        payload = '\n'
+        if context == Response.WELCOME:
             context = get_response(text)
-            if context == 10:
-                response = Response.objects.filter(context=context).first().response
-                context = 0
-            # else:
-            #     response = Response.objects.filter(context=context).first().response
-        elif context == 1 and re.findall('(small|regular|medium|large)', text):
+            if context == Response.FALLBACK:
+                response = select_random_response(Response.FALLBACK)
+                context = Response.WELCOME
+            context_change = False
+        elif context == Response.TAKE_SIZE and re.findall('(small|regular|medium|large)', text):
             request.session['size'] = re.findall('(small|regular|medium|large)', text)[0]
-            context += 1
-            # response = Response.objects.filter(context=context).first().response
-        elif context == 2 and re.findall(self.create_regex(Toppings, 'topping'), text):
+            toppings = Toppings.objects.values_list('topping', flat=True)
+            payload = 'We have '
+            for topping in toppings:
+                payload += str(topping) + ', '
+            payload = payload[:-2] + '.'
+        elif context == Response.TAKE_TOPPINGS and re.findall(self.create_regex(Toppings, 'topping'), text):
             request.session['toppings'] = re.findall(self.create_regex(Toppings, 'topping'), text)
-            context += 1
-            # response = Response.objects.filter(context=context).first().response
-        elif context == 3 and re.findall('\d+', text):
+            payload = '(Enter quantity in integer value.)'
+        elif context == Response.TAKE_QUANTITY and re.findall('\d+', text):
             request.session['quantity'] = re.findall('\d+', text)[0]
-            context += 1
-            # response = Response.objects.filter(context=context).first().response
-        elif context == 4:
+        elif context == Response.TAKE_NAME:
             request.session['name'] = text
-            context = context + 1
-            # response = Response.objects.filter(context=context).first().response
-        elif context == 5:
+        elif context == Response.TAKE_ADDRESS:
             request.session['address'] = text
-            context += 1
             price = Size.objects.filter(size=request.session['size']).first().price
             price += Toppings.objects.filter(topping__in=list(session['toppings'])).aggregate(Sum('price'))[
                 'price__sum']
             price *= int(session['quantity'])
             response = "That will be: " + str(price) + "Rs. \n Shall I confirm it."
-        elif context == 6:
+        elif context == Response.TAKE_CONFIRMATION:
             if re.findall('yes|yep|sure|great|yeah|ok|okay|cool', text.lower()):
                 size = Size.objects.filter(size=session['size']).first()
                 toppings = Toppings.objects.filter(topping__in=list(session['toppings']))
                 order = Order(name=session['name'], address=session['address'], quantity=session['quantity'], size=size)
                 order.save()
                 order.toppings.add(*list(toppings))
-                context = 0
                 response = 'Thanks for ordering with us. Your Order No is: ' + str(order.order_id)
+                context = Response.WELCOME
+                context_change = False
             elif re.findall('no|nah|never', text.lower()):
-                context = 1
+                context = Response.TAKE_SIZE
+                context_change = False
                 response = "Okay, Let's rebuild your order again. Tell me the pizza size again."
                 clear_session(request)
             else:
-                response = Response.objects.filter(context=10).first().response
-        elif context == 7 and re.findall('\d{2,7}', text):
+                response = select_random_response(Response.FALLBACK)
+                context_change = False
+        elif context == Response.GET_STATUS and re.findall('\d{2,7}', text):
             order_no = int(re.findall('\d{2,7}', text)[0])
             order = Order.objects.filter(order_id=order_no).first()
             if order:
                 response = 'Your Order is ' + order.status
-                context = 0
+                context = Response.WELCOME
+                context_change = False
             else:
                 response = 'Please enter correct Order number.'
+                context_change = False
         else:
-            response = Response.objects.filter(context=10).first().response
+            response = select_random_response(Response.FALLBACK)
+            context_change = False
+
+        if context_change:
+            context += 1
+        session['context'] = context
 
         if response == '':
-            response = Response.objects.filter(context=context).first().response
+            response = select_random_response(context) + payload
 
-        session['context'] = context
         return JsonResponse({
             'text': response
         })
@@ -102,3 +110,9 @@ def clear_session(request):
     if request.session.get('quantity', 0): del request.session['quantity']
     if request.session.get('name', 0): del request.session['name']
     if request.session.get('address', 0): del request.session['address']
+
+
+def select_random_response(context):
+    response = Response.objects.filter(context=context).all()
+    random_response = random.choices(response)[0]
+    return random_response.response
