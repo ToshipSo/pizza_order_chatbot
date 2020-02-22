@@ -2,10 +2,8 @@ import pickle
 
 import nltk
 
-nltk.download('stopwords')
 nltk.download('punkt')
 from nltk.tokenize import word_tokenize
-from nltk.corpus import stopwords
 
 word_feature_file = open('media/wordFeature.pickle', 'rb')
 word_features = pickle.load(word_feature_file)
@@ -18,7 +16,7 @@ classifier_file.close()
 def process_text(text):
     text = text.lower()
     text = word_tokenize(text)
-    return [word for word in text if word not in set(stopwords.words('english'))]
+    return text
 
 
 def extract_features(text):
@@ -34,7 +32,12 @@ def get_response(text):
     features = extract_features(processed_text)
     label = classifier.classify(features)
     x = classifier.prob_classify(features).prob(label)
-    if x < 0.51:
+    if x < 0.80:
         return 10
     return int(label)
+    # return x
 
+# while True:
+#     n = input()
+#     res = get_response(n)
+#     print(res)

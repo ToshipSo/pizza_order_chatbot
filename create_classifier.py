@@ -1,16 +1,12 @@
 import nltk
 
-nltk.download('stopwords')
 nltk.download('punkt')
 from nltk.tokenize import word_tokenize
-from nltk.corpus import stopwords
 import csv
 import pickle
 
 
 class PreProcessText:
-    def __init__(self):
-        self._stopwords = set(stopwords.words('english'))
 
     def processText(self, list_of_texts):
         processedText = []
@@ -21,7 +17,7 @@ class PreProcessText:
     def _processText(self, text):
         text = text.lower()
         text = word_tokenize(text)
-        return [word for word in text if word not in self._stopwords]
+        return text
 
 
 def buildVocabulary(preprocessedTrainingSet):
