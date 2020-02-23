@@ -38,7 +38,7 @@ class ChatAPI(APIView):
             payload = payload[:-2] + '.'
         elif context == Response.TAKE_SIZE and re.findall(create_regex(Size, 'size'), text.lower()):
             request.session['size'] = re.findall(create_regex(Size, 'size'), text.lower())[0]
-            payload = '(Enter quantity in integer value.)'
+            payload = ' (Enter quantity as a number.)'
         elif context == Response.TAKE_QUANTITY and re.findall('\d+', text.lower()):
             request.session['quantity'] = re.findall('\d+', text)[0]
         elif context == Response.TAKE_NAME:

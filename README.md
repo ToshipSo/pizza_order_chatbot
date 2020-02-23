@@ -37,13 +37,14 @@ Run `python manage.py createsuperuser` to create Admin User
     * You can add more pizza toppings and size from Admin Panel.
 
 ## Sample Workflow
-* User: Hey
+* Bot: Hello, Welcome to YoYo Pizza.
+* User: Hi
 * Bot: Hi there, How may I help you?
 * User: I would like to order pizza.
+* Bot: Here is our Menu. We have Farmhouse, Margherita, Indian spice, Desi chutney.
+* User: I like Farmhouse.
 * Bot: Sure, What pizza size do you want?
 * User: I prefer large pizza.
-* Bot: Okay, Which toppings? We have paneer, olive, tomato.
-* User: I like paneer and olives.
 * Bot: Nice, How many pizza do you want?
 * User: I want 2 pizza. (Provide quantity in integer)
 * Bot: Great, Can you tell me your name?
@@ -54,7 +55,7 @@ Run `python manage.py createsuperuser` to create Admin User
 * User: Sure.
 * Bot: Thanks for ordering with us. Your Order No is: 1380165
 * User: What is my order status?
-* Bot: Sure, What pizza size do you want?
+* Bot: Can you provide me your order number.
 * User: Here it is. 1380165
 * Bot: Your Order is Placed.
 
