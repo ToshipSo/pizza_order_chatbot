@@ -22,18 +22,24 @@ class ChatAPI(APIView):
             if context == Response.FALLBACK:
                 response = select_random_response(Response.FALLBACK)
                 context = Response.WELCOME
+            elif context == Response.TAKE_SIZE:
+                payload += 'We have '
+                sizes = Size.objects.values_list('size', flat=True)
+                for size in sizes:
+                    payload += str(size).capitalize() + ', '
+                payload = payload[:-2] + '.'
             context_change = False
-        elif context == Response.TAKE_SIZE and re.findall(create_regex(Size, 'size'), text):
-            request.session['size'] = re.findall(create_regex(Size, 'size'), text)[0]
+        elif context == Response.TAKE_SIZE and re.findall(create_regex(Size, 'size'), text.lower()):
+            request.session['size'] = re.findall(create_regex(Size, 'size'), text.lower())[0]
             toppings = Toppings.objects.values_list('topping', flat=True)
             payload = 'We have '
             for topping in toppings:
-                payload += str(topping) + ', '
+                payload += str(topping).capitalize() + ', '
             payload = payload[:-2] + '.'
-        elif context == Response.TAKE_TOPPINGS and re.findall(create_regex(Toppings, 'topping'), text):
-            request.session['toppings'] = re.findall(create_regex(Toppings, 'topping'), text)
+        elif context == Response.TAKE_TOPPINGS and re.findall(create_regex(Toppings, 'topping'), text.lower()):
+            request.session['toppings'] = re.findall(create_regex(Toppings, 'topping'), text.lower())
             payload = '(Enter quantity in integer value.)'
-        elif context == Response.TAKE_QUANTITY and re.findall('\d+', text):
+        elif context == Response.TAKE_QUANTITY and re.findall('\d+', text.lower()):
             request.session['quantity'] = re.findall('\d+', text)[0]
         elif context == Response.TAKE_NAME:
             request.session['name'] = text
@@ -62,7 +68,7 @@ class ChatAPI(APIView):
             else:
                 response = select_random_response(Response.FALLBACK)
                 context_change = False
-        elif context == Response.GET_STATUS and re.findall('\d{2,7}', text):
+        elif context == Response.GET_STATUS and re.findall('\d{2,7}', text.lower()):
             order_no = int(re.findall('\d{2,7}', text)[0])
             order = Order.objects.filter(order_id=order_no).first()
             if order:
