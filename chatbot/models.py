@@ -6,8 +6,8 @@ import time
 # Create your models here.
 class Response(models.Model):
     WELCOME = 0
-    TAKE_SIZE = 1
-    TAKE_TOPPINGS = 2
+    TAKE_PIZZA = 1
+    TAKE_SIZE = 2
     TAKE_QUANTITY = 3
     TAKE_NAME = 4
     TAKE_ADDRESS = 5
@@ -17,8 +17,8 @@ class Response(models.Model):
 
     CHOICES = (
         (WELCOME, 'Welcome'),
+        (TAKE_PIZZA, 'Take Pizza'),
         (TAKE_SIZE, 'Take Size'),
-        (TAKE_TOPPINGS, 'Take Toppings'),
         (TAKE_QUANTITY, 'Take Quantity'),
         (TAKE_NAME, 'Take Name'),
         (TAKE_ADDRESS, 'Take Address'),
@@ -30,16 +30,16 @@ class Response(models.Model):
     context = models.PositiveSmallIntegerField(choices=CHOICES)
 
 
-class Toppings(models.Model):
-    topping = models.CharField(max_length=15)
+class Pizza(models.Model):
+    name = models.CharField(max_length=20)
     price = models.IntegerField()
 
     def __str__(self):
-        return self.topping
+        return self.name
 
     def save(self, *args, **kwargs):
-        self.topping = self.topping.lower()
-        return super(Toppings, self).save(*args, **kwargs)
+        self.name = self.name.lower()
+        return super(Pizza, self).save(*args, **kwargs)
 
 
 class Size(models.Model):
@@ -65,7 +65,7 @@ class Order(models.Model):
     name = models.CharField(max_length=30)
     address = models.CharField(max_length=100)
     quantity = models.PositiveSmallIntegerField()
-    toppings = models.ManyToManyField(Toppings, related_name='toppings', null=True)
+    pizza = models.ForeignKey(Pizza, related_name='pizza', on_delete=models.DO_NOTHING)
     size = models.ForeignKey(Size, related_name='pizza_size', on_delete=models.DO_NOTHING)
     status = models.CharField(max_length=20, choices=STATUS, default='Placed')
 

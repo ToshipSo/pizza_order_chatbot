@@ -1,10 +1,5 @@
 from django.contrib import admin
-from .models import Toppings, Size, Order, Response
-
-
-# Register your models here.
-class ToppingsAdmin(admin.ModelAdmin):
-    list_display = ['topping', 'price']
+from .models import Size, Order, Response, Pizza
 
 
 class SizeAdmin(admin.ModelAdmin):
@@ -20,7 +15,7 @@ class ResponseAdmin(admin.ModelAdmin):
     list_display = ['response', 'context']
 
 
-admin.site.register(Toppings, ToppingsAdmin)
 admin.site.register(Size, SizeAdmin)
 admin.site.register(Order, OrderAdmin)
 admin.site.register(Response, ResponseAdmin)
+admin.site.register(Pizza)

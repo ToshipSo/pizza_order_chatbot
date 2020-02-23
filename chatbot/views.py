@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from rest_framework.views import APIView
 from .chat_response import get_response
-from .models import Response, Toppings, Order, Size
+from .models import Response, Order, Size, Pizza
 from django.db.models import Sum
 import re
 import random
@@ -22,22 +22,22 @@ class ChatAPI(APIView):
             if context == Response.FALLBACK:
                 response = select_random_response(Response.FALLBACK)
                 context = Response.WELCOME
-            elif context == Response.TAKE_SIZE:
+            elif context == Response.TAKE_PIZZA:
                 payload += 'We have '
-                sizes = Size.objects.values_list('size', flat=True)
-                for size in sizes:
-                    payload += str(size).capitalize() + ', '
+                pizzas = Pizza.objects.values_list('name', flat=True)
+                for pizza in pizzas:
+                    payload += str(pizza).capitalize() + ', '
                 payload = payload[:-2] + '.'
             context_change = False
+        elif context == Response.TAKE_PIZZA and re.findall(create_regex(Pizza, 'name'), text.lower()):
+            session['pizza'] = re.findall(create_regex(Pizza, 'name'), text.lower())[0]
+            payload += 'We have '
+            sizes = Size.objects.values_list('size', flat=True)
+            for size in sizes:
+                payload += str(size).capitalize() + ', '
+            payload = payload[:-2] + '.'
         elif context == Response.TAKE_SIZE and re.findall(create_regex(Size, 'size'), text.lower()):
             request.session['size'] = re.findall(create_regex(Size, 'size'), text.lower())[0]
-            toppings = Toppings.objects.values_list('topping', flat=True)
-            payload = 'We have '
-            for topping in toppings:
-                payload += str(topping).capitalize() + ', '
-            payload = payload[:-2] + '.'
-        elif context == Response.TAKE_TOPPINGS and re.findall(create_regex(Toppings, 'topping'), text.lower()):
-            request.session['toppings'] = re.findall(create_regex(Toppings, 'topping'), text.lower())
             payload = '(Enter quantity in integer value.)'
         elif context == Response.TAKE_QUANTITY and re.findall('\d+', text.lower()):
             request.session['quantity'] = re.findall('\d+', text)[0]
@@ -46,17 +46,16 @@ class ChatAPI(APIView):
         elif context == Response.TAKE_ADDRESS:
             request.session['address'] = text
             price = Size.objects.filter(size=request.session['size']).first().price
-            price += Toppings.objects.filter(topping__in=list(session['toppings'])).aggregate(Sum('price'))[
-                'price__sum']
+            price += Pizza.objects.filter(name=session['pizza']).first().price
             price *= int(session['quantity'])
             response = "That will be: " + str(price) + "Rs. \n Shall I confirm it."
         elif context == Response.TAKE_CONFIRMATION:
             if re.findall('yes|yep|sure|great|yeah|ok|okay|cool', text.lower()):
                 size = Size.objects.filter(size=session['size']).first()
-                toppings = Toppings.objects.filter(topping__in=list(session['toppings']))
-                order = Order(name=session['name'], address=session['address'], quantity=session['quantity'], size=size)
+                pizza = Pizza.objects.filter(name=session['pizza']).first()
+                order = Order(name=session['name'], address=session['address'], quantity=session['quantity'], size=size,
+                              pizza=pizza)
                 order.save()
-                order.toppings.add(*list(toppings))
                 response = 'Thanks for ordering with us. Your Order No is: ' + str(order.order_id)
                 context = Response.WELCOME
                 context_change = False
